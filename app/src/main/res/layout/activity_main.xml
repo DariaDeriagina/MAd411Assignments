@@ -6,63 +6,85 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <EditText
-        android:id="@+id/expenseName"
+    <!-- Expense Name Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/expenseNameLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
-        android:layout_height="64dp"
+        android:layout_height="wrap_content"
         android:hint="Expense Name"
-        android:inputType="text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_margin="16dp"/>
+        android:layout_margin="16dp">
 
-    <EditText
-        android:id="@+id/expenseAmount"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/expenseName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Expense Amount Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/expenseAmountLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
         android:hint="Amount"
-        android:inputType="numberDecimal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/expenseName"
-        android:layout_margin="16dp"/>
+        app:layout_constraintTop_toBottomOf="@id/expenseNameLayout"
+        android:layout_margin="16dp">
 
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/expenseAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <EditText
-        android:id="@+id/expenseDate"
-        android:layout_width="0dp"
-        android:layout_height="64dp"
-        android:hint="Date (Optional)"
-        android:inputType="date"
+    <!-- Date Picker Button -->
+    <Button
+        android:id="@+id/selectDateButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Date"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/expenseAmount"
+        app:layout_constraintTop_toBottomOf="@id/expenseAmountLayout"
         android:layout_margin="16dp"/>
 
+    <!-- Display Selected Date -->
+    <TextView
+        android:id="@+id/selectedDateText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Date: Not Selected"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/selectDateButton"
+        android:layout_margin="8dp"/>
+
+    <!-- Add Expense Button -->
     <Button
         android:id="@+id/addExpenseButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:layout_marginTop="100dp"
         android:text="Add Expense"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/expenseDate" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/selectedDateText"
+        android:layout_margin="16dp"/>
 
+    <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/expenseRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/addExpenseButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-
-
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="16dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-
