@@ -1,8 +1,9 @@
 package com.example.assignmnet_7_android
 
-import android.annotation.SuppressLint
 import android.app.DatePickerDialog
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -18,12 +19,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var selectedDateText: TextView
     private var selectedDate: String = "Not Selected"
 
-    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Log.d("Lifecycle", "onCreate called")
 
-        // Get UI elements
+        // Initialize UI elements
         val expenseName = findViewById<TextInputEditText>(R.id.expenseName)
         val expenseAmount = findViewById<TextInputEditText>(R.id.expenseAmount)
         val selectDateButton = findViewById<Button>(R.id.selectDateButton)
@@ -32,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.expenseRecyclerView)
 
         // Setup RecyclerView
-        expenseAdapter = ExpenseAdapter(expenses) { position -> removeExpense(position) }
+        expenseAdapter = ExpenseAdapter(expenses, ::removeExpense, ::showExpenseDetails)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = expenseAdapter
 
@@ -56,19 +57,20 @@ class MainActivity : AppCompatActivity() {
             val name = expenseName.text.toString().trim()
             val amountText = expenseAmount.text.toString().trim()
 
-            // Validate input
-            if (name.isEmpty()) {
-                Toast.makeText(this, "Expense name cannot be empty", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            if (amountText.isEmpty() || !amountText.matches(Regex("^[0-9]+(\\.[0-9]{1,2})?$"))) {
-                Toast.makeText(this, "Please enter a valid amount", Toast.LENGTH_SHORT).show()
+            if (name.isEmpty() || amountText.isEmpty()) {
+                Toast.makeText(this, "Please enter valid details", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Add new expense
-            val newExpense = Expense(name, "$$amountText (${if (selectedDate != "Not Selected") selectedDate else "No Date"})")
-            expenseAdapter.addExpense(newExpense)
+            val amount = amountText.toDoubleOrNull()
+            if (amount == null) {
+                Toast.makeText(this, "Invalid amount", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val newExpense = Expense(name, amount, selectedDate)
+            expenses.add(newExpense)
+            expenseAdapter.notifyItemInserted(expenses.size - 1)
 
             // Clear inputs
             expenseName.text?.clear()
@@ -78,8 +80,45 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun showExpenseDetails(position: Int) {
+        val expense = expenses[position]
+        val intent = Intent(this, ShowDetailsActivity::class.java)
+        intent.putExtra("expenseName", expense.name)
+        intent.putExtra("expenseAmount", expense.amount.toString())
+        intent.putExtra("expenseDate", expense.date)
+        startActivity(intent)
+    }
+
     private fun removeExpense(position: Int) {
-        expenseAdapter.removeExpense(position)
+        expenses.removeAt(position)
+        expenseAdapter.notifyItemRemoved(position)
         Toast.makeText(this, "Expense removed", Toast.LENGTH_SHORT).show()
     }
+
+    // Lifecycle Logging
+    override fun onStart() {
+        super.onStart()
+        Log.d("Lifecycle", "onStart called")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("Lifecycle", "onResume called")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("Lifecycle", "onPause called")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("Lifecycle", "onStop called")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("Lifecycle", "onDestroy called")
+    }
 }
+
