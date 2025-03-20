@@ -23,6 +23,8 @@
         </activity>
 
         <!-- Added this line to register ShowDetailsActivity -->
+        <activity android:name=".ExpenseDetailsActivity" />
+
         <activity android:name=".ShowDetailsActivity" />
 
     </application>

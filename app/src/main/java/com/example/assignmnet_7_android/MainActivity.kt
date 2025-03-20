@@ -82,12 +82,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun showExpenseDetails(position: Int) {
         val expense = expenses[position]
-        val intent = Intent(this, ShowDetailsActivity::class.java)
+        val intent = Intent(this, ExpenseDetailsActivity::class.java)
         intent.putExtra("expenseName", expense.name)
         intent.putExtra("expenseAmount", expense.amount.toString())
         intent.putExtra("expenseDate", expense.date)
         startActivity(intent)
     }
+
 
     private fun removeExpense(position: Int) {
         expenses.removeAt(position)

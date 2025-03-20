@@ -44,4 +44,7 @@
         android:text="Details"
         android:backgroundTint="@android:color/holo_blue_light"
         android:textColor="@android:color/white"/>
+
+
+
 </LinearLayout>
