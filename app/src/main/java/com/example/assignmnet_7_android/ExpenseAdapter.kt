@@ -30,10 +30,16 @@ class ExpenseAdapter(
         holder.expenseName.text = expense.name
         holder.expenseAmount.text = "$${expense.amount}"
 
-        holder.deleteButton.setOnClickListener { onDeleteClick(position) }
-        holder.detailsButton.setOnClickListener { onDetailsClick(position) } // Pass data to new activity
-    }
+        // Delete Button Click Listener
+        holder.deleteButton.setOnClickListener {
+            onDeleteClick(position)
+        }
 
+        // Details Button Click Listener
+        holder.detailsButton.setOnClickListener {
+            onDetailsClick(position)
+        }
+    }
 
     override fun getItemCount(): Int = expenses.size
 }

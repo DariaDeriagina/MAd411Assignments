@@ -2,6 +2,7 @@ package com.example.assignmnet_7_android
 
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -18,11 +19,22 @@ class MainActivity : AppCompatActivity() {
     private val expenses = mutableListOf<Expense>()
     private lateinit var selectedDateText: TextView
     private var selectedDate: String = "Not Selected"
+    private var footerFragment: FooterFragment? = null
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         Log.d("Lifecycle", "onCreate called")
+
+        //Initialize the header element
+// Initialize Header Fragment
+        val headerFragment = HeaderFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.headerContainer, headerFragment)
+            .commit()
+
 
         // Initialize UI elements
         val expenseName = findViewById<TextInputEditText>(R.id.expenseName)
@@ -31,6 +43,13 @@ class MainActivity : AppCompatActivity() {
         selectedDateText = findViewById(R.id.selectedDateText)
         val addExpenseButton = findViewById<Button>(R.id.addExpenseButton)
         val recyclerView = findViewById<RecyclerView>(R.id.expenseRecyclerView)
+        val financialTipsButton = findViewById<Button>(R.id.tipsButton)
+
+        // Initialize Footer Fragment
+        footerFragment = FooterFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.footerContainer, footerFragment!!)
+            .commit()
 
         // Setup RecyclerView
         expenseAdapter = ExpenseAdapter(expenses, ::removeExpense, ::showExpenseDetails)
@@ -46,7 +65,7 @@ class MainActivity : AppCompatActivity() {
 
             val datePickerDialog = DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDay ->
                 selectedDate = "$selectedDay/${selectedMonth + 1}/$selectedYear"
-                selectedDateText.text = "Date: $selectedDate"
+                selectedDateText.text = getString(R.string.selected_date, selectedDate)
             }, year, month, day)
 
             datePickerDialog.show()
@@ -58,13 +77,13 @@ class MainActivity : AppCompatActivity() {
             val amountText = expenseAmount.text.toString().trim()
 
             if (name.isEmpty() || amountText.isEmpty()) {
-                Toast.makeText(this, "Please enter valid details", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.invalid_details, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             val amount = amountText.toDoubleOrNull()
             if (amount == null) {
-                Toast.makeText(this, "Invalid amount", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.invalid_amount, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -72,54 +91,49 @@ class MainActivity : AppCompatActivity() {
             expenses.add(newExpense)
             expenseAdapter.notifyItemInserted(expenses.size - 1)
 
+            // Update Footer Fragment
+            updateTotalExpense()
+
             // Clear inputs
             expenseName.text?.clear()
             expenseAmount.text?.clear()
             selectedDate = "Not Selected"
-            selectedDateText.text = "Date: Not Selected"
+            selectedDateText.text = getString(R.string.default_date)
+        }
+
+        // Implicit Intent - Open Financial Tips Website
+        financialTipsButton.setOnClickListener {
+            val url = "https://www.canada.ca/en/financial-consumer-agency/services/covid-19-managing-financial-health.html"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
         }
     }
 
+    // Function to Remove an Expense
+    private fun removeExpense(position: Int) {
+        if (position in expenses.indices) {
+            expenses.removeAt(position)
+            expenseAdapter.notifyItemRemoved(position)
+            expenseAdapter.notifyItemRangeChanged(position, expenses.size)
+            updateTotalExpense()
+            Toast.makeText(this, R.string.expense_removed, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Function to Update Total Expense in Footer Fragment
+    private fun updateTotalExpense() {
+        val total = expenses.sumOf { it.amount }
+        footerFragment?.updateTotalExpense(total)
+    }
+
+    // Function to Show Expense Details (Explicit Intent)
     private fun showExpenseDetails(position: Int) {
         val expense = expenses[position]
-        val intent = Intent(this, ExpenseDetailsActivity::class.java)
-        intent.putExtra("expenseName", expense.name)
-        intent.putExtra("expenseAmount", expense.amount.toString())
-        intent.putExtra("expenseDate", expense.date)
+        val intent = Intent(this, ExpenseDetailsActivity::class.java).apply {
+            putExtra("expenseName", expense.name)
+            putExtra("expenseAmount", expense.amount.toString())
+            putExtra("expenseDate", expense.date)
+        }
         startActivity(intent)
     }
-
-
-    private fun removeExpense(position: Int) {
-        expenses.removeAt(position)
-        expenseAdapter.notifyItemRemoved(position)
-        Toast.makeText(this, "Expense removed", Toast.LENGTH_SHORT).show()
-    }
-
-    // Lifecycle Logging
-    override fun onStart() {
-        super.onStart()
-        Log.d("Lifecycle", "onStart called")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d("Lifecycle", "onResume called")
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d("Lifecycle", "onPause called")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d("Lifecycle", "onStop called")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d("Lifecycle", "onDestroy called")
-    }
 }
-
