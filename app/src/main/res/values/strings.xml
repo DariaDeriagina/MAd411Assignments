@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Assignmnet_7_Android</string>
+    <string name="selected_date">Date: %1$s</string>
+    <string name="invalid_details">Please enter valid details</string>
+    <string name="invalid_amount">Invalid amount</string>
+    <string name="default_date">Date: Not Selected</string>
+    <string name="expense_removed">Expense removed</string>
+
+
+
 </resources>

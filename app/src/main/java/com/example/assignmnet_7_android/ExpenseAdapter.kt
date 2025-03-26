@@ -7,13 +7,17 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class ExpenseAdapter(private val expenses: MutableList<Expense>, private val onDeleteClick: (Int) -> Unit) :
-    RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {
+class ExpenseAdapter(
+    private val expenses: MutableList<Expense>,
+    private val onDeleteClick: (Int) -> Unit,
+    private val onDetailsClick: (Int) -> Unit
+) : RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {
 
     class ExpenseViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val expenseName: TextView = view.findViewById(R.id.expenseNameText)
         val expenseAmount: TextView = view.findViewById(R.id.expenseAmountText)
         val deleteButton: Button = view.findViewById(R.id.deleteExpenseButton)
+        val detailsButton: Button = view.findViewById(R.id.showDetailsButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExpenseViewHolder {
@@ -24,19 +28,18 @@ class ExpenseAdapter(private val expenses: MutableList<Expense>, private val onD
     override fun onBindViewHolder(holder: ExpenseViewHolder, position: Int) {
         val expense = expenses[position]
         holder.expenseName.text = expense.name
-        holder.expenseAmount.text = expense.amount
-        holder.deleteButton.setOnClickListener { onDeleteClick(position) }
+        holder.expenseAmount.text = "$${expense.amount}"
+
+        // Delete Button Click Listener
+        holder.deleteButton.setOnClickListener {
+            onDeleteClick(position)
+        }
+
+        // Details Button Click Listener
+        holder.detailsButton.setOnClickListener {
+            onDetailsClick(position)
+        }
     }
 
     override fun getItemCount(): Int = expenses.size
-
-    fun addExpense(expense: Expense) {
-        expenses.add(expense)
-        notifyItemInserted(expenses.size - 1)
-    }
-
-    fun removeExpense(position: Int) {
-        expenses.removeAt(position)
-        notifyItemRemoved(position)
-    }
 }
