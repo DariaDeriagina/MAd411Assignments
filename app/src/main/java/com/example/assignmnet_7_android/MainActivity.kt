@@ -12,31 +12,44 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.io.*
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var expenseAdapter: ExpenseAdapter
     private val expenses = mutableListOf<Expense>()
     private lateinit var selectedDateText: TextView
     private var selectedDate: String = "Not Selected"
     private var footerFragment: FooterFragment? = null
 
-
+    private val fileName = "expenses.json"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         Log.d("Lifecycle", "onCreate called")
 
-        //Initialize the header element
-// Initialize Header Fragment
-        val headerFragment = HeaderFragment()
+        // Load expenses from file
+        loadExpensesFromFile()
+
+        // Setup header fragment
         supportFragmentManager.beginTransaction()
-            .replace(R.id.headerContainer, headerFragment)
+            .replace(R.id.headerContainer, HeaderFragment())
             .commit()
 
+        // Setup footer fragment
+        footerFragment = FooterFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.footerContainer, footerFragment!!)
+            .commit()
 
-        // Initialize UI elements
+        // Update footer with loaded total
+        updateTotalExpense()
+
+        // Setup UI elements
         val expenseName = findViewById<TextInputEditText>(R.id.expenseName)
         val expenseAmount = findViewById<TextInputEditText>(R.id.expenseAmount)
         val selectDateButton = findViewById<Button>(R.id.selectDateButton)
@@ -45,18 +58,12 @@ class MainActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.expenseRecyclerView)
         val financialTipsButton = findViewById<Button>(R.id.tipsButton)
 
-        // Initialize Footer Fragment
-        footerFragment = FooterFragment()
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.footerContainer, footerFragment!!)
-            .commit()
-
         // Setup RecyclerView
         expenseAdapter = ExpenseAdapter(expenses, ::removeExpense, ::showExpenseDetails)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = expenseAdapter
 
-        // Date Picker Dialog
+        // Date Picker
         selectDateButton.setOnClickListener {
             val calendar = Calendar.getInstance()
             val year = calendar.get(Calendar.YEAR)
@@ -71,7 +78,7 @@ class MainActivity : AppCompatActivity() {
             datePickerDialog.show()
         }
 
-        // Handle button click for adding expenses
+        // Add Expense
         addExpenseButton.setOnClickListener {
             val name = expenseName.text.toString().trim()
             val amountText = expenseAmount.text.toString().trim()
@@ -91,17 +98,16 @@ class MainActivity : AppCompatActivity() {
             expenses.add(newExpense)
             expenseAdapter.notifyItemInserted(expenses.size - 1)
 
-            // Update Footer Fragment
             updateTotalExpense()
+            saveExpensesToFile()
 
-            // Clear inputs
             expenseName.text?.clear()
             expenseAmount.text?.clear()
             selectedDate = "Not Selected"
             selectedDateText.text = getString(R.string.default_date)
         }
 
-        // Implicit Intent - Open Financial Tips Website
+        // Open Financial Tips
         financialTipsButton.setOnClickListener {
             val url = "https://www.canada.ca/en/financial-consumer-agency/services/covid-19-managing-financial-health.html"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -109,24 +115,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Function to Remove an Expense
     private fun removeExpense(position: Int) {
         if (position in expenses.indices) {
             expenses.removeAt(position)
             expenseAdapter.notifyItemRemoved(position)
             expenseAdapter.notifyItemRangeChanged(position, expenses.size)
             updateTotalExpense()
+            saveExpensesToFile()
             Toast.makeText(this, R.string.expense_removed, Toast.LENGTH_SHORT).show()
         }
     }
 
-    // Function to Update Total Expense in Footer Fragment
     private fun updateTotalExpense() {
         val total = expenses.sumOf { it.amount }
         footerFragment?.updateTotalExpense(total)
     }
 
-    // Function to Show Expense Details (Explicit Intent)
     private fun showExpenseDetails(position: Int) {
         val expense = expenses[position]
         val intent = Intent(this, ExpenseDetailsActivity::class.java).apply {
@@ -135,5 +139,32 @@ class MainActivity : AppCompatActivity() {
             putExtra("expenseDate", expense.date)
         }
         startActivity(intent)
+    }
+
+    private fun saveExpensesToFile() {
+        try {
+            val json = Gson().toJson(expenses)
+            openFileOutput(fileName, MODE_PRIVATE).use {
+                it.write(json.toByteArray())
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun loadExpensesFromFile() {
+        try {
+            val fileInput = openFileInput(fileName)
+            val reader = BufferedReader(InputStreamReader(fileInput))
+            val json = reader.readText()
+            val type = object : TypeToken<MutableList<Expense>>() {}.type
+            val savedExpenses: MutableList<Expense> = Gson().fromJson(json, type)
+            expenses.clear()
+            expenses.addAll(savedExpenses)
+        } catch (e: FileNotFoundException) {
+            // File doesn't exist yet, no problem
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
 }
