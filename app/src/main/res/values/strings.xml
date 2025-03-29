@@ -1,10 +1,16 @@
 <resources>
-    <string name="app_name">Assignmnet_7_Android</string>
     <string name="selected_date">Date: %1$s</string>
-    <string name="invalid_details">Please enter valid details</string>
+    <string name="expense_name">Name: %1$s</string>
+    <string name="expense_amount">Amount: $%1$s</string>
+    <string name="expense_date">Date: %1$s</string>
+    <string name="total_expense">Total Expense: $%1$.2f</string>
+    <string name="invalid_details">Please enter name and amount</string>
     <string name="invalid_amount">Invalid amount</string>
     <string name="default_date">Date: Not Selected</string>
     <string name="expense_removed">Expense removed</string>
+    <string name="app_name">Expense Tracker</string>
+
+
 
 
 
