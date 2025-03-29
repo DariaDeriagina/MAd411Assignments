@@ -20,6 +20,9 @@ class FooterFragment : Fragment() {
     }
 
     fun updateTotalExpense(total: Double) {
-        totalExpenseText.text = "Total Expense: $$total"
+        if (::totalExpenseText.isInitialized) {
+            totalExpenseText.text = "Total Expense: $%.2f".format(total)
+        }
     }
+
 }

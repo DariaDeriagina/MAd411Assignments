@@ -26,17 +26,18 @@ class MainActivity : AppCompatActivity() {
     private var selectedDate: String = "Not Selected"
     private var footerFragment: FooterFragment? = null
     private val fileName = "expenses.json"
+    private val gson = Gson()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        Toast.makeText(this, "Assignment 9 is running", Toast.LENGTH_SHORT).show()
         Log.d("Lifecycle", "onCreate called")
 
         // Initialize header fragment
-        val headerFragment = HeaderFragment()
         supportFragmentManager.beginTransaction()
-            .replace(R.id.headerContainer, headerFragment)
+            .replace(R.id.headerContainer, HeaderFragment())
             .commit()
 
         // Initialize UI elements
@@ -59,7 +60,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = expenseAdapter
 
-        // Load saved expenses
+        // Load expenses from file
         loadExpensesFromFile()
         expenseAdapter.notifyDataSetChanged()
         updateTotalExpense()
@@ -71,15 +72,13 @@ class MainActivity : AppCompatActivity() {
             val month = calendar.get(Calendar.MONTH)
             val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-            val datePickerDialog = DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDay ->
-                selectedDate = "$selectedDay/${selectedMonth + 1}/$selectedYear"
+            DatePickerDialog(this, { _, y, m, d ->
+                selectedDate = "$d/${m + 1}/$y"
                 selectedDateText.text = getString(R.string.selected_date, selectedDate)
-            }, year, month, day)
-
-            datePickerDialog.show()
+            }, year, month, day).show()
         }
 
-        // Add expense button
+        // Add new expense
         addExpenseButton.setOnClickListener {
             val name = expenseName.text.toString().trim()
             val amountText = expenseAmount.text.toString().trim()
@@ -98,21 +97,16 @@ class MainActivity : AppCompatActivity() {
             val newExpense = Expense(name, amount, selectedDate)
             expenses.add(newExpense)
             expenseAdapter.notifyItemInserted(expenses.size - 1)
-
-            // Save to file
             saveExpensesToFile()
-
-            // Update footer
             updateTotalExpense()
 
-            // Clear inputs
             expenseName.text?.clear()
             expenseAmount.text?.clear()
             selectedDate = "Not Selected"
             selectedDateText.text = getString(R.string.default_date)
         }
 
-        // Financial Tips - Implicit Intent
+        // Open Financial Tips (Implicit Intent)
         financialTipsButton.setOnClickListener {
             val url = "https://www.canada.ca/en/financial-consumer-agency/services/covid-19-managing-financial-health.html"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -120,7 +114,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Remove expense
     private fun removeExpense(position: Int) {
         if (position in expenses.indices) {
             expenses.removeAt(position)
@@ -132,13 +125,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Update footer fragment
     private fun updateTotalExpense() {
         val total = expenses.sumOf { it.amount }
         footerFragment?.updateTotalExpense(total)
     }
 
-    // Show details (explicit intent)
     private fun showExpenseDetails(position: Int) {
         val expense = expenses[position]
         val intent = Intent(this, ExpenseDetailsActivity::class.java).apply {
@@ -149,10 +140,9 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    // Save expenses to JSON file
     private fun saveExpensesToFile() {
         try {
-            val json = Gson().toJson(expenses)
+            val json = gson.toJson(expenses)
             openFileOutput(fileName, MODE_PRIVATE).use {
                 it.write(json.toByteArray())
             }
@@ -161,7 +151,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Load expenses from JSON file
     private fun loadExpensesFromFile() {
         try {
             val file = File(filesDir, fileName)
@@ -170,7 +159,7 @@ class MainActivity : AppCompatActivity() {
             val json = file.readText()
             if (json.isNotBlank()) {
                 val type = object : TypeToken<MutableList<Expense>>() {}.type
-                val savedExpenses: MutableList<Expense> = Gson().fromJson(json, type)
+                val savedExpenses: MutableList<Expense> = gson.fromJson(json, type)
                 expenses.clear()
                 expenses.addAll(savedExpenses)
             }
