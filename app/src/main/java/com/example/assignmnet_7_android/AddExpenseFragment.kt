@@ -2,9 +2,7 @@ package com.example.assignmnet_7_android.fragments
 
 import android.app.DatePickerDialog
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.*
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -23,6 +21,7 @@ class AddExpenseFragment : Fragment() {
     private lateinit var currencySpinner: Spinner
     private lateinit var costEditText: EditText
     private lateinit var convertedCostTextView: TextView
+    private lateinit var progressBar: ProgressBar
     private var exchangeRates: Map<String, Double> = emptyMap()
 
     override fun onCreateView(
@@ -37,16 +36,16 @@ class AddExpenseFragment : Fragment() {
         costEditText = view.findViewById(R.id.expenseCost)
         currencySpinner = view.findViewById(R.id.currencySpinner)
         convertedCostTextView = view.findViewById(R.id.convertedCostTextView)
+        progressBar = view.findViewById(R.id.progressBar)
         val saveButton: Button = view.findViewById(R.id.saveButton)
 
-        // 📅 Date Picker
+        // Date Picker
         dateEditText.setOnClickListener {
             val calendar = Calendar.getInstance()
             DatePickerDialog(
                 requireContext(),
                 { _, year, month, day ->
-                    val selectedDate = "$day/${month + 1}/$year"
-                    dateEditText.setText(selectedDate)
+                    dateEditText.setText("$day/${month + 1}/$year")
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
@@ -54,13 +53,15 @@ class AddExpenseFragment : Fragment() {
             ).show()
         }
 
-        // Fetch currency rates and populate spinner
+        // Fetch currency data
         lifecycleScope.launch {
+            progressBar.visibility = View.VISIBLE
             try {
                 val result = withContext(Dispatchers.IO) {
                     RetrofitInstance.api.getRates("cad")
                 }
                 exchangeRates = result.conversion_rates
+                progressBar.visibility = View.GONE
 
                 val currencyCodes = exchangeRates.keys.sorted()
                 val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, currencyCodes)
@@ -83,11 +84,12 @@ class AddExpenseFragment : Fragment() {
                 }
 
             } catch (e: Exception) {
+                progressBar.visibility = View.GONE
                 Toast.makeText(requireContext(), "Failed to load exchange rates: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // 💾 Save button logic
+        // Save
         saveButton.setOnClickListener {
             val name = nameEditText.text.toString()
             val date = dateEditText.text.toString()
