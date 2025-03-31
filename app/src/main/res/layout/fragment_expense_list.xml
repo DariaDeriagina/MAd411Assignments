@@ -17,7 +17,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/expenseNameInput"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="48dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -27,35 +27,37 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/expenseAmountInput"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:inputType="numberDecimal"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button
             android:id="@+id/selectDateButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Select Date"/>
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Select Date"
+            android:layout_marginTop="12dp" />
 
         <TextView
             android:id="@+id/selectedDateText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/default_date"
-            android:paddingTop="4dp"/>
+            android:textSize="16sp"
+            android:layout_marginTop="6dp"/>
 
         <Button
             android:id="@+id/addExpenseButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:text="Add Expense"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="16dp"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/expenseRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="16dp"/>
 
         <TextView
             android:id="@+id/totalExpenseText"
@@ -63,13 +65,13 @@
             android:layout_height="wrap_content"
             android:text="Total Expense: $0.00"
             android:textStyle="bold"
-            android:textSize="16sp"
-            android:layout_marginTop="8dp"/>
+            android:textSize="18sp"
+            android:layout_marginTop="16dp"/>
 
         <Button
             android:id="@+id/tipsButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
             android:text="Financial Tips"
             android:layout_marginTop="16dp"/>
     </LinearLayout>

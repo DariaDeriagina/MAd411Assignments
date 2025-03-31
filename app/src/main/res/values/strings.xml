@@ -10,6 +10,10 @@
     <string name="expense_removed">Expense removed</string>
     <string name="app_name">Expense Tracker</string>
     <string name="converted_text">Converted: %.2f</string>
+    <string name="detail_name_format">Name: %1$s</string>
+    <string name="detail_amount_format">Amount: $%1$s</string>
+    <string name="detail_date_format">Date: %1$s</string>
+
 
 
 

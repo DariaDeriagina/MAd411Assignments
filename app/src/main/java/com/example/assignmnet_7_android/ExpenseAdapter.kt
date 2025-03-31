@@ -10,8 +10,8 @@ import com.example.assignmnet_7_android.models.Expense
 
 class ExpenseAdapter(
     private val expenses: MutableList<Expense>,
-    private val onDeleteClick: (Int) -> Unit = {},
-    private val onDetailsClick: (Int) -> Unit = {}
+    private val onDeleteClick: (Int) -> Unit,
+    private val onDetailsClick: (Expense) -> Unit
 ) : RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {
 
     class ExpenseViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -23,7 +23,8 @@ class ExpenseAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExpenseViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_expense, parent, false)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_expense, parent, false)
         return ExpenseViewHolder(view)
     }
 
@@ -38,7 +39,7 @@ class ExpenseAdapter(
         }
 
         holder.detailsButton.setOnClickListener {
-            onDetailsClick(position)
+            onDetailsClick(expense)
         }
     }
 

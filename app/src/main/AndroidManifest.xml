@@ -22,7 +22,7 @@
             </intent-filter>
         </activity>
 
-        <!-- Added this line to register ShowDetailsActivity -->
+
 
 
         <activity android:name=".ShowDetailsActivity" />

@@ -15,6 +15,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import android.content.Context
+import androidx.navigation.fragment.findNavController
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -48,7 +49,25 @@ class ExpenseListFragment : Fragment() {
         recyclerView = view.findViewById(R.id.expenseRecyclerView)
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        adapter = ExpenseAdapter(expenses)
+        adapter = ExpenseAdapter(
+            expenses,
+            onDeleteClick = { position ->
+                expenses.removeAt(position)
+                adapter.notifyItemRemoved(position)
+                saveExpensesToFile()
+                updateTotal()
+            },
+            onDetailsClick = { expense ->
+                val action = ExpenseListFragmentDirections
+                    .actionExpenseListFragmentToExpenseDetailsFragment(
+                        expenseName = expense.name,
+                        expenseAmount = expense.amount.toString(),
+                        expenseDate = expense.date
+                    )
+                findNavController().navigate(action)
+            }
+        )
+
         recyclerView.adapter = adapter
 
         loadExpensesFromFile()

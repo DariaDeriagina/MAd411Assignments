@@ -6,8 +6,8 @@
 
     <fragment
         android:id="@+id/expenseListFragment"
-        android:name="com.example.assignmnet_7_android.ExpenseListFragment"
-        android:label="Expenses" >
+        android:name="com.example.assignmnet_7_android.fragments.ExpenseListFragment"
+        android:label="Expenses">
         <action
             android:id="@+id/action_expenseListFragment_to_expenseDetailsFragment"
             app:destination="@id/expenseDetailsFragment" />
@@ -27,5 +27,6 @@
             android:name="expenseDate"
             app:argType="string" />
     </fragment>
+
 
 </navigation>

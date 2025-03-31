@@ -12,14 +12,18 @@
         <EditText
             android:id="@+id/expenseName"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
+            android:padding="12dp"
             android:hint="Expense Name"
             android:inputType="textPersonName" />
 
         <EditText
             android:id="@+id/expenseDate"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
+            android:padding="12dp"
             android:hint="Date"
             android:focusable="false"
             android:clickable="true"
@@ -36,7 +40,9 @@
         <EditText
             android:id="@+id/expenseCost"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
+            android:padding="12dp"
             android:hint="Cost"
             android:inputType="numberDecimal"
             android:layout_marginTop="12dp" />
@@ -44,7 +50,9 @@
         <Spinner
             android:id="@+id/currencySpinner"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
+            android:padding="12dp"
             android:layout_marginTop="12dp" />
 
         <TextView
@@ -57,10 +65,10 @@
 
         <Button
             android:id="@+id/saveButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
             android:text="Save"
-            android:layout_gravity="center_horizontal"
             android:layout_marginTop="24dp" />
     </LinearLayout>
 </ScrollView>
