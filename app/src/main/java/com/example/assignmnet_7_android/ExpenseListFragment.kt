@@ -17,7 +17,6 @@ import com.google.gson.reflect.TypeToken
 import android.content.Context
 import androidx.navigation.fragment.findNavController
 import java.io.*
-import java.text.SimpleDateFormat
 import java.util.*
 
 class ExpenseListFragment : Fragment() {
@@ -67,8 +66,25 @@ class ExpenseListFragment : Fragment() {
                 findNavController().navigate(action)
             }
         )
-
         recyclerView.adapter = adapter
+
+        // ✅ ADDING THE MISSING PART TO RECEIVE NEW EXPENSE FROM AddExpenseFragment
+        val savedStateHandle = findNavController().currentBackStackEntry?.savedStateHandle
+        savedStateHandle?.get<Bundle>("newExpense")?.let { bundle ->
+            val newExpense = Expense(
+                name = bundle.getString("name", ""),
+                amount = bundle.getDouble("amount", 0.0),
+                date = bundle.getString("date", ""),
+                costAssociated = bundle.getBoolean("costAssociated", true),
+                currency = bundle.getString("currency", "CAD"),
+                convertedCost = bundle.getDouble("convertedCost", 0.0)
+            )
+            expenses.add(newExpense)
+            adapter.notifyItemInserted(expenses.size - 1)
+            saveExpensesToFile()
+            updateTotal()
+            savedStateHandle.remove<Bundle>("newExpense")
+        }
 
         loadExpensesFromFile()
         updateTotal()
