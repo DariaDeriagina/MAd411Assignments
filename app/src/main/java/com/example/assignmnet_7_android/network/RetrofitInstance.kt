@@ -1,14 +1,16 @@
-package com.example.assignmnet_7_android.network
+package com.example.assignment_7_android.network
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
-    val api: CurrencyApiService by lazy {
+    private const val BASE_URL = "https://open.er-api.com/"
+
+    val api: ExchangeRateApi by lazy {
         Retrofit.Builder()
-            .baseUrl("https://open.er-api.com/")
+            .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(CurrencyApiService::class.java)
+            .create(ExchangeRateApi::class.java)
     }
 }
