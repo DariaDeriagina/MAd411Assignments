@@ -1,12 +1,10 @@
-package com.example.assignment_7_android.network
+package com.example.assignmnet_7_android.network
 
 import com.example.assignment_7_android.models.ExchangeRateResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 
 interface ExchangeRateApi {
-
-    // exemple: https://open.er-api.com/v6/latest/CAD
     @GET("v6/latest/{base}")
-    suspend fun getExchangeRates(@Path("base") baseCurrency: String): ExchangeRateResponse
+    suspend fun getRates(@Path("base") base: String): ExchangeRateResponse
 }

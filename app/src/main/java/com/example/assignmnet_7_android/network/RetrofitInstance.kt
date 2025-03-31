@@ -1,5 +1,7 @@
-package com.example.assignment_7_android.network
+package com.example.assignmnet_7_android
 
+
+import com.example.assignmnet_7_android.network.ExchangeRateApi
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

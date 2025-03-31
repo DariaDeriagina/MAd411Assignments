@@ -1,145 +1,145 @@
-package com.example.assignmnet_7_android
+package com.example.assignmnet_7_android.fragments
 
 import android.app.DatePickerDialog
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Toast
+import android.view.*
+import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.assignmnet_7_android.databinding.FragmentExpenseListBinding
+import androidx.recyclerview.widget.RecyclerView
+import com.example.assignmnet_7_android.ExpenseAdapter
+import com.example.assignmnet_7_android.R
+import com.example.assignmnet_7_android.models.Expense
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import java.io.File
-import java.io.IOException
+import android.content.Context
+import java.io.*
+import java.text.SimpleDateFormat
 import java.util.*
 
 class ExpenseListFragment : Fragment() {
 
-    private var _binding: FragmentExpenseListBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var nameInput: TextInputEditText
+    private lateinit var amountInput: TextInputEditText
+    private lateinit var selectedDateText: TextView
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: ExpenseAdapter
+    private lateinit var totalText: TextView
 
-    private lateinit var expenseAdapter: ExpenseAdapter
     private val expenses = mutableListOf<Expense>()
-    private var selectedDate: String = "Not Selected"
-    private val fileName = "expenses.json"
+    private var selectedDate: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentExpenseListBinding.inflate(inflater, container, false)
-        return binding.root
+        return inflater.inflate(R.layout.fragment_expense_list, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        expenseAdapter = ExpenseAdapter(expenses, ::removeExpense, ::showExpenseDetails)
-        binding.expenseRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.expenseRecyclerView.adapter = expenseAdapter
+        nameInput = view.findViewById(R.id.expenseNameInput)
+        amountInput = view.findViewById(R.id.expenseAmountInput)
+        selectedDateText = view.findViewById(R.id.selectedDateText)
+        totalText = view.findViewById(R.id.totalExpenseText)
+        recyclerView = view.findViewById(R.id.expenseRecyclerView)
+
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        adapter = ExpenseAdapter(expenses)
+        recyclerView.adapter = adapter
 
         loadExpensesFromFile()
-        updateTotalExpense()
+        updateTotal()
 
-        binding.selectDateButton.setOnClickListener {
-            val calendar = Calendar.getInstance()
-            DatePickerDialog(
-                requireContext(),
-                { _, y, m, d ->
-                    selectedDate = "$d/${m + 1}/$y"
-                    binding.selectedDateText.text = getString(R.string.selected_date, selectedDate)
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-            ).show()
+        view.findViewById<Button>(R.id.selectDateButton).setOnClickListener {
+            showDatePicker()
         }
 
-        binding.addExpenseButton.setOnClickListener {
-            val name = binding.expenseNameInput.text.toString().trim()
-            val amountText = binding.expenseAmountInput.text.toString().trim()
-
-            if (name.isEmpty() || amountText.isEmpty()) {
-                Toast.makeText(requireContext(), R.string.invalid_details, Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val amount = amountText.toDoubleOrNull()
-            if (amount == null) {
-                Toast.makeText(requireContext(), R.string.invalid_amount, Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val expense = Expense(name, amount, selectedDate)
-            expenses.add(expense)
-            expenseAdapter.notifyItemInserted(expenses.size - 1)
-            saveExpensesToFile()
-            updateTotalExpense()
-
-            binding.expenseNameInput.text?.clear()
-            binding.expenseAmountInput.text?.clear()
-            selectedDate = "Not Selected"
-            binding.selectedDateText.text = getString(R.string.default_date)
+        view.findViewById<Button>(R.id.addExpenseButton).setOnClickListener {
+            addExpense()
         }
 
-        binding.tipsButton.setOnClickListener {
-            val url = "https://www.canada.ca/en/financial-consumer-agency/services/covid-19-managing-financial-health.html"
-            startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url)))
+        view.findViewById<Button>(R.id.tipsButton).setOnClickListener {
+            Snackbar.make(view, "💡 Tip: Track daily to avoid overspending!", Snackbar.LENGTH_LONG).show()
         }
     }
 
-    private fun removeExpense(position: Int) {
-        expenses.removeAt(position)
-        expenseAdapter.notifyItemRemoved(position)
-        saveExpensesToFile()
-        updateTotalExpense()
+    private fun showDatePicker() {
+        val calendar = Calendar.getInstance()
+        DatePickerDialog(requireContext(), { _, year, month, day ->
+            val date = "$day/${month + 1}/$year"
+            selectedDate = date
+            selectedDateText.text = date
+        },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show()
     }
 
-    private fun updateTotalExpense() {
-        val total = expenses.sumOf { it.amount }
-        binding.totalExpenseText.text = "Total Expense: $$total"
-    }
+    private fun addExpense() {
+        val name = nameInput.text.toString()
+        val amount = amountInput.text.toString().toDoubleOrNull()
+        val date = if (selectedDate.isNotEmpty()) selectedDate else "Not Set"
 
-    private fun showExpenseDetails(position: Int) {
-        val expense = expenses[position]
-        val action = ExpenseListFragmentDirections.actionExpenseListFragmentToExpenseDetailsFragment(
-            expense.name, expense.amount.toString(), expense.date
+        if (name.isBlank() || amount == null) {
+            Toast.makeText(requireContext(), "Enter valid name and amount", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val expense = Expense(
+            name = name,
+            amount = amount,
+            date = date,
+            costAssociated = true,
+            currency = "CAD", // default
+            convertedCost = amount // default same as amount
         )
-        findNavController().navigate(action)
+
+        expenses.add(expense)
+        adapter.notifyItemInserted(expenses.size - 1)
+        saveExpensesToFile()
+        updateTotal()
+
+        nameInput.text?.clear()
+        amountInput.text?.clear()
+        selectedDateText.text = getString(R.string.default_date)
+        selectedDate = ""
+    }
+
+    private fun updateTotal() {
+        val total = expenses.sumOf { it.convertedCost }
+        totalText.text = "Total Expense: $%.2f".format(total)
     }
 
     private fun saveExpensesToFile() {
         try {
             val json = Gson().toJson(expenses)
-            requireContext().openFileOutput(fileName, android.content.Context.MODE_PRIVATE).use {
+            requireContext().openFileOutput("expenses.json", Context.MODE_PRIVATE).use {
                 it.write(json.toByteArray())
             }
         } catch (e: IOException) {
-            e.printStackTrace()
+            Toast.makeText(requireContext(), "Save failed", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun loadExpensesFromFile() {
         try {
-            val file = File(requireContext().filesDir, fileName)
+            val file = File(requireContext().filesDir, "expenses.json")
             if (!file.exists()) return
 
             val json = file.readText()
-            val type = object : TypeToken<MutableList<Expense>>() {}.type
-            val savedExpenses: MutableList<Expense> = Gson().fromJson(json, type)
-            expenses.clear()
-            expenses.addAll(savedExpenses)
-            expenseAdapter.notifyDataSetChanged()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
+            val type = object : TypeToken<List<Expense>>() {}.type
+            val loaded = Gson().fromJson<List<Expense>>(json, type)
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+            expenses.clear()
+            expenses.addAll(loaded)
+            adapter.notifyDataSetChanged()
+        } catch (e: IOException) {
+            Toast.makeText(requireContext(), "Load failed", Toast.LENGTH_SHORT).show()
+        }
     }
 }

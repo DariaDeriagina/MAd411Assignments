@@ -3,55 +3,49 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:padding="12dp"
-    android:orientation="horizontal"
-    android:background="@android:color/white"
-    android:gravity="center_vertical">
+    android:background="#EEEEEE"
+    android:layout_marginBottom="8dp">
 
-    <!-- Expense Name -->
     <TextView
         android:id="@+id/expenseNameText"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:text="Expense Name"
-        android:textSize="18sp"
         android:textStyle="bold"
-        android:paddingEnd="8dp"/>
+        android:textSize="16sp" />
 
-    <!-- Expense Amount -->
     <TextView
         android:id="@+id/expenseAmountText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="$0.00"
-        android:textSize="16sp"
-        android:paddingEnd="16dp"/>
+        android:text="Amount" />
 
-    <!-- Button Container -->
-    <LinearLayout
+    <TextView
+        android:id="@+id/expenseConvertedText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="end">
+        android:text="Converted Cost" />
 
-        <!-- Delete Button -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:layout_marginTop="4dp">
+
+        <Button
+            android:id="@+id/showDetailsButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Details" />
+
         <Button
             android:id="@+id/deleteExpenseButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Delete"
-            android:backgroundTint="@android:color/holo_red_light"
-            android:textColor="@android:color/white"
-            android:layout_marginEnd="8dp"/>
-
-        <!-- Show Details Button -->
-        <Button
-            android:id="@+id/showDetailsButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Details"
-            android:backgroundTint="@android:color/holo_blue_light"
-            android:textColor="@android:color/white"/>
+            android:layout_marginStart="8dp" />
     </LinearLayout>
 </LinearLayout>

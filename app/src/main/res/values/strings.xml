@@ -9,6 +9,8 @@
     <string name="default_date">Date: Not Selected</string>
     <string name="expense_removed">Expense removed</string>
     <string name="app_name">Expense Tracker</string>
+    <string name="converted_text">Converted: %.2f</string>
+
 
 
 
