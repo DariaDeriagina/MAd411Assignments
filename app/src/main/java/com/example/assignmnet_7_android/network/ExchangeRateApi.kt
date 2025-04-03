@@ -6,6 +6,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 
 interface ExchangeRateApi {
-    @GET("v6/latest/{currency}")
+    @GET("latest/{currency}")
     suspend fun getRates(@Path("currency") base: String): ExchangeRateResponse
+
 }

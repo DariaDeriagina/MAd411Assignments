@@ -1,6 +1,5 @@
 package com.example.assignmnet_7_android.fragments
 
-import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.*
 import android.widget.*
@@ -10,26 +9,22 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.assignmnet_7_android.ExpenseAdapter
 import com.example.assignmnet_7_android.R
 import com.example.assignmnet_7_android.models.Expense
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import android.content.Context
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import java.io.*
-import java.util.*
 
 class ExpenseListFragment : Fragment() {
 
-    private lateinit var nameInput: TextInputEditText
-    private lateinit var amountInput: TextInputEditText
-    private lateinit var selectedDateText: TextView
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ExpenseAdapter
     private lateinit var totalText: TextView
+    private lateinit var fab: FloatingActionButton
 
     private val expenses = mutableListOf<Expense>()
-    private var selectedDate: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,11 +36,9 @@ class ExpenseListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        nameInput = view.findViewById(R.id.expenseNameInput)
-        amountInput = view.findViewById(R.id.expenseAmountInput)
-        selectedDateText = view.findViewById(R.id.selectedDateText)
-        totalText = view.findViewById(R.id.totalExpenseText)
         recyclerView = view.findViewById(R.id.expenseRecyclerView)
+        totalText = view.findViewById(R.id.totalExpenseText)
+        fab = view.findViewById(R.id.addExpenseFab)
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         adapter = ExpenseAdapter(
@@ -68,9 +61,8 @@ class ExpenseListFragment : Fragment() {
         )
         recyclerView.adapter = adapter
 
-        // ✅ ADDING THE MISSING PART TO RECEIVE NEW EXPENSE FROM AddExpenseFragment
-        val savedStateHandle = findNavController().currentBackStackEntry?.savedStateHandle
-        savedStateHandle?.get<Bundle>("newExpense")?.let { bundle ->
+        // ✅ Handle new expense from AddExpenseFragment
+        findNavController().currentBackStackEntry?.savedStateHandle?.get<Bundle>("newExpense")?.let { bundle ->
             val newExpense = Expense(
                 name = bundle.getString("name", ""),
                 amount = bundle.getDouble("amount", 0.0),
@@ -83,66 +75,21 @@ class ExpenseListFragment : Fragment() {
             adapter.notifyItemInserted(expenses.size - 1)
             saveExpensesToFile()
             updateTotal()
-            savedStateHandle.remove<Bundle>("newExpense")
+            findNavController().currentBackStackEntry?.savedStateHandle?.remove<Bundle>("newExpense")
         }
 
         loadExpensesFromFile()
         updateTotal()
 
-        view.findViewById<Button>(R.id.selectDateButton).setOnClickListener {
-            showDatePicker()
-        }
-
-        view.findViewById<Button>(R.id.addExpenseButton).setOnClickListener {
-            addExpense()
-        }
-
+        // 💡 Tip button
         view.findViewById<Button>(R.id.tipsButton).setOnClickListener {
             Snackbar.make(view, "💡 Tip: Track daily to avoid overspending!", Snackbar.LENGTH_LONG).show()
         }
-    }
 
-    private fun showDatePicker() {
-        val calendar = Calendar.getInstance()
-        DatePickerDialog(requireContext(), { _, year, month, day ->
-            val date = "$day/${month + 1}/$year"
-            selectedDate = date
-            selectedDateText.text = date
-        },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).show()
-    }
-
-    private fun addExpense() {
-        val name = nameInput.text.toString()
-        val amount = amountInput.text.toString().toDoubleOrNull()
-        val date = if (selectedDate.isNotEmpty()) selectedDate else "Not Set"
-
-        if (name.isBlank() || amount == null) {
-            Toast.makeText(requireContext(), "Enter valid name and amount", Toast.LENGTH_SHORT).show()
-            return
+        // ➕ FloatingActionButton
+        fab.setOnClickListener {
+            findNavController().navigate(R.id.action_expenseListFragment_to_addExpenseFragment)
         }
-
-        val expense = Expense(
-            name = name,
-            amount = amount,
-            date = date,
-            costAssociated = true,
-            currency = "CAD", // default
-            convertedCost = amount // default same as amount
-        )
-
-        expenses.add(expense)
-        adapter.notifyItemInserted(expenses.size - 1)
-        saveExpensesToFile()
-        updateTotal()
-
-        nameInput.text?.clear()
-        amountInput.text?.clear()
-        selectedDateText.text = getString(R.string.default_date)
-        selectedDate = ""
     }
 
     private fun updateTotal() {

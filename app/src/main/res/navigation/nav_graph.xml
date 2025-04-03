@@ -7,11 +7,19 @@
     <fragment
         android:id="@+id/expenseListFragment"
         android:name="com.example.assignmnet_7_android.fragments.ExpenseListFragment"
-        android:label="Expenses">
+        android:label="Expenses" >
+        <action
+            android:id="@+id/action_expenseListFragment_to_addExpenseFragment"
+            app:destination="@id/addExpenseFragment" />
         <action
             android:id="@+id/action_expenseListFragment_to_expenseDetailsFragment"
             app:destination="@id/expenseDetailsFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/addExpenseFragment"
+        android:name="com.example.assignmnet_7_android.fragments.AddExpenseFragment"
+        android:label="Add Expense" />
 
     <fragment
         android:id="@+id/expenseDetailsFragment"
@@ -27,6 +35,5 @@
             android:name="expenseDate"
             app:argType="string" />
     </fragment>
-
-
 </navigation>
+
