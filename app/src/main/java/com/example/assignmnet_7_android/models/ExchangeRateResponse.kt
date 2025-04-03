@@ -1,4 +1,4 @@
-package com.example.assignment_7_android.models
+package com.example.assignmnet_7_android.models
 
 data class ExchangeRateResponse(
     val result: String,
