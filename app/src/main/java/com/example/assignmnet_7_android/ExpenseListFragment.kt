@@ -1,5 +1,6 @@
 package com.example.assignmnet_7_android.fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.view.*
 import android.widget.*
@@ -9,12 +10,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.assignmnet_7_android.ExpenseAdapter
 import com.example.assignmnet_7_android.R
 import com.example.assignmnet_7_android.models.Expense
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import android.content.Context
-import androidx.navigation.fragment.findNavController
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
 import java.io.*
 
 class ExpenseListFragment : Fragment() {
@@ -48,6 +48,7 @@ class ExpenseListFragment : Fragment() {
                 adapter.notifyItemRemoved(position)
                 saveExpensesToFile()
                 updateTotal()
+                Toast.makeText(requireContext(), "Expense deleted", Toast.LENGTH_SHORT).show()
             },
             onDetailsClick = { expense ->
                 val action = ExpenseListFragmentDirections
@@ -61,34 +62,51 @@ class ExpenseListFragment : Fragment() {
         )
         recyclerView.adapter = adapter
 
-        // ✅ Handle new expense from AddExpenseFragment
-        findNavController().currentBackStackEntry?.savedStateHandle?.get<Bundle>("newExpense")?.let { bundle ->
-            val newExpense = Expense(
-                name = bundle.getString("name", ""),
-                amount = bundle.getDouble("amount", 0.0),
-                date = bundle.getString("date", ""),
-                costAssociated = bundle.getBoolean("costAssociated", true),
-                currency = bundle.getString("currency", "CAD"),
-                convertedCost = bundle.getDouble("convertedCost", 0.0)
-            )
-            expenses.add(newExpense)
-            adapter.notifyItemInserted(expenses.size - 1)
-            saveExpensesToFile()
-            updateTotal()
-            findNavController().currentBackStackEntry?.savedStateHandle?.remove<Bundle>("newExpense")
-        }
-
+        // Load previously saved expenses first
         loadExpensesFromFile()
-        updateTotal()
 
-        // 💡 Tip button
+        // Then check for new added expense
+        handleNewExpense()
+
+        // Show tips
         view.findViewById<Button>(R.id.tipsButton).setOnClickListener {
             Snackbar.make(view, "💡 Tip: Track daily to avoid overspending!", Snackbar.LENGTH_LONG).show()
         }
 
-        // ➕ FloatingActionButton
+        // FAB for adding new expense
         fab.setOnClickListener {
             findNavController().navigate(R.id.action_expenseListFragment_to_addExpenseFragment)
+        }
+
+        updateTotal()
+    }
+
+    private fun handleNewExpense() {
+        val handle = findNavController().currentBackStackEntry?.savedStateHandle
+
+        handle?.let {
+            val name = it.get<String>("name") ?: return
+            val amount = it.get<Double>("amount") ?: 0.0
+            val date = it.get<String>("date") ?: ""
+            val costAssociated = it.get<Boolean>("costAssociated") ?: false
+            val currency = it.get<String>("currency") ?: "CAD"
+            val convertedCost = it.get<Double>("convertedCost") ?: 0.0
+
+            val newExpense = Expense(name, amount, date, costAssociated, currency, convertedCost)
+            expenses.add(newExpense)
+            adapter.notifyItemInserted(expenses.size - 1)
+            saveExpensesToFile()
+            updateTotal()
+
+            Toast.makeText(requireContext(), "Expense saved!", Toast.LENGTH_SHORT).show()
+
+            // Clear keys
+            it.remove<String>("name")
+            it.remove<Double>("amount")
+            it.remove<String>("date")
+            it.remove<Boolean>("costAssociated")
+            it.remove<String>("currency")
+            it.remove<Double>("convertedCost")
         }
     }
 
@@ -104,7 +122,7 @@ class ExpenseListFragment : Fragment() {
                 it.write(json.toByteArray())
             }
         } catch (e: IOException) {
-            Toast.makeText(requireContext(), "Save failed", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Failed to save expenses", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -121,7 +139,7 @@ class ExpenseListFragment : Fragment() {
             expenses.addAll(loaded)
             adapter.notifyDataSetChanged()
         } catch (e: IOException) {
-            Toast.makeText(requireContext(), "Load failed", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Failed to load expenses", Toast.LENGTH_SHORT).show()
         }
     }
 }

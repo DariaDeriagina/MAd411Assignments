@@ -13,6 +13,11 @@
     <string name="detail_name_format">Name: %1$s</string>
     <string name="detail_amount_format">Amount: $%1$s</string>
     <string name="detail_date_format">Date: %1$s</string>
+    <string name="tip_message">💡 Tip: Track daily to avoid overspending!</string>
+    <string name="save_failed">Save failed</string>
+    <string name="load_failed">Load failed</string>
+    <string name="expense_deleted">Expense deleted</string>
+
 
 
 

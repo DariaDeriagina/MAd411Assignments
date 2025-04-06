@@ -4,7 +4,6 @@ import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.*
 import android.widget.*
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -39,13 +38,13 @@ class AddExpenseFragment : Fragment() {
         progressBar = view.findViewById(R.id.progressBar)
         val saveButton: Button = view.findViewById(R.id.saveButton)
 
-        // Date Picker
+        // 📅 Date Picker
         dateEditText.setOnClickListener {
             val calendar = Calendar.getInstance()
             DatePickerDialog(
                 requireContext(),
-                { _, year, month, day ->
-                    dateEditText.setText("$day/${month + 1}/$year")
+                { _, year, month, dayOfMonth ->
+                    dateEditText.setText("$dayOfMonth/${month + 1}/$year")
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
@@ -53,13 +52,15 @@ class AddExpenseFragment : Fragment() {
             ).show()
         }
 
-        // Fetch currency data
+        // 🌐 Fetch currency data
         lifecycleScope.launch {
             progressBar.visibility = View.VISIBLE
             try {
                 val result = withContext(Dispatchers.IO) {
                     RetrofitInstance.api.getRates("cad")
                 }
+
+                // Only update UI after data fetched
                 exchangeRates = result.conversion_rates
                 progressBar.visibility = View.GONE
 
@@ -75,7 +76,6 @@ class AddExpenseFragment : Fragment() {
                     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                         calculateConvertedCost()
                     }
-
                     override fun onNothingSelected(parent: AdapterView<*>?) {}
                 }
 
@@ -85,18 +85,24 @@ class AddExpenseFragment : Fragment() {
 
             } catch (e: Exception) {
                 progressBar.visibility = View.GONE
-                Toast.makeText(requireContext(), "Failed to load exchange rates: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "❌ Failed to load exchange rates", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // Save
+        // 💾 Save Button
         saveButton.setOnClickListener {
             val name = nameEditText.text.toString()
             val date = dateEditText.text.toString()
             val costAssociated = costCheckBox.isChecked
             val amount = costEditText.text.toString().toDoubleOrNull() ?: 0.0
-            val currency = currencySpinner.selectedItem.toString()
+            val currency = currencySpinner.selectedItem?.toString() ?: "CAD"
             val convertedCost = calculateConvertedCost()
+
+            // Basic validation
+            if (name.isBlank() || date.isBlank() || amount <= 0.0) {
+                Toast.makeText(requireContext(), "Please fill out all fields correctly", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
             val expense = Expense(
                 name = name,
@@ -107,14 +113,15 @@ class AddExpenseFragment : Fragment() {
                 convertedCost = convertedCost
             )
 
-            findNavController().previousBackStackEntry?.savedStateHandle?.set("newExpense", bundleOf(
-                "name" to expense.name,
-                "amount" to expense.amount,
-                "date" to expense.date,
-                "costAssociated" to expense.costAssociated,
-                "currency" to expense.currency,
-                "convertedCost" to expense.convertedCost
-            ))
+            val handle = findNavController().previousBackStackEntry?.savedStateHandle
+            handle?.set("newExpense", Bundle().apply {
+                putString("name", expense.name)
+                putDouble("amount", expense.amount)
+                putString("date", expense.date)
+                putBoolean("costAssociated", expense.costAssociated)
+                putString("currency", expense.currency)
+                putDouble("convertedCost", expense.convertedCost)
+            })
 
             findNavController().popBackStack()
         }
@@ -124,7 +131,7 @@ class AddExpenseFragment : Fragment() {
 
     private fun calculateConvertedCost(): Double {
         val amount = costEditText.text.toString().toDoubleOrNull() ?: 0.0
-        val currency = currencySpinner.selectedItem.toString()
+        val currency = currencySpinner.selectedItem?.toString() ?: "CAD"
         val rate = exchangeRates[currency] ?: 1.0
         val converted = amount * rate
         convertedCostTextView.text = getString(R.string.converted_text, converted)
